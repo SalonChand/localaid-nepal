@@ -1,16 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { getUpcomingEvents } from '../services/eventService';
+import React, { useEffect, useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getUpcomingEvents, rsvpEvent } from '../services/eventService';
+import { AuthContext } from '../context/AuthContext';
 
 const Events = () => {
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  
   const[events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const[error, setError] = useState('');
+  const [error, setError] = useState('');
+  const [processingId, setProcessingId] = useState(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await getUpcomingEvents();
-        setEvents(response.data ||[]);
+        setEvents(response.data || [ ]);
       } catch (err) {
         setError('Failed to load upcoming events.');
       } finally {
@@ -19,15 +25,47 @@ const Events = () => {
     };
 
     fetchEvents();
-  },[]);
+  } , [ ] );
+
+  const handleRSVP = async (eventId) => {
+    if (!user) {
+      alert("You must sign in to join an event.");
+      navigate('/login');
+      return;
+    }
+
+    setProcessingId(eventId);
+    try {
+      const res = await rsvpEvent(eventId);
+      
+      // Update UI locally without refreshing the whole page
+      setEvents(events.map(event => {
+        if (event.id === eventId) {
+          let newParticipants = [...(event.participants || [ ])];
+          if (res.joined) {
+            newParticipants.push({ userId: user.id });
+          } else {
+            newParticipants = newParticipants.filter(p => p.userId !== user.id);
+          }
+          return { ...event, participants: newParticipants };
+        }
+        return event;
+      }));
+      
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to RSVP. Event might be full.');
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-8">
         
         <div className="border-b border-slate-200 pb-5">
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Community Events</h1>
-          <p className="mt-2 text-sm text-slate-500">Discover upcoming relief campaigns, blood donation drives, and volunteer meetups across Nepal.</p>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Community Campaigns</h1>
+          <p className="mt-2 text-sm text-slate-500">Discover and join upcoming relief campaigns, blood donation drives, and volunteer meetups across Nepal.</p>
         </div>
 
         {error && (
@@ -49,13 +87,17 @@ const Events = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-slate-900">No upcoming events</h3>
+            <h3 className="text-lg font-medium text-slate-900">No upcoming campaigns</h3>
             <p className="mt-1 text-sm text-slate-500">There are no campaigns scheduled at this time. Check back later!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => {
               const eventDate = new Date(event.date);
+              const participantCount = event.participants?.length || 0;
+              const isGoing = user && event.participants?.some(p => p.userId === user.id);
+              const isFull = event.capacity && participantCount >= event.capacity && !isGoing;
+
               return (
                 <div key={event.id} className="bg-white border border-slate-200 rounded-3xl overflow-hidden hover:shadow-lg hover:border-amber-200 transition-all duration-300 flex flex-col">
                   {/* Date Banner */}
@@ -76,21 +118,43 @@ const Events = () => {
                       </p>
                     </div>
                     
-                    <div className="space-y-3 pt-4 border-t border-slate-100 text-sm text-slate-600 font-medium">
+                    <div className="space-y-3 pt-4 border-t border-slate-100 text-sm text-slate-600 font-medium mb-6">
                       <div className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         <span className="truncate">{event.location}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        <span>Capacity: {event.capacity ? `${event.capacity} Volunteers` : 'Unlimited'}</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                          <span>{participantCount} {event.capacity ? `/ ${event.capacity} Joined` : 'Joined'}</span>
+                        </div>
+                        {isGoing && (
+                          <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-xs font-bold uppercase">You're Going</span>
+                        )}
                       </div>
                     </div>
+
+                    <button
+                      onClick={() => handleRSVP(event.id)}
+                      disabled={processingId === event.id || isFull}
+                      className={`w-full py-3 px-4 rounded-xl font-bold transition-all duration-300 shadow-sm ${
+                        isGoing 
+                        ? 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200' 
+                        : isFull 
+                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                        : 'bg-amber-500 hover:bg-amber-600 text-white'
+                      }`}
+                    >
+                      {processingId === event.id ? 'Updating...' : 
+                       isGoing ? 'Leave Campaign' : 
+                       isFull ? 'Event Full' : 
+                       'Join Campaign'}
+                    </button>
+
                   </div>
                 </div>
               );

@@ -11,7 +11,8 @@ const Organization = require('./src/models/Organization');
 const TaskAssignment = require('./src/models/TaskAssignment');
 const Event = require('./src/models/Event');
 const Notification = require('./src/models/Notification');
-const Message = require('./src/models/Message'); // NEW MESSAGE MODEL
+const Message = require('./src/models/Message');
+const Participation = require('./src/models/Participation');
 
 const PORT = process.env.PORT || 5000;
 
