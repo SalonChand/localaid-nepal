@@ -3,8 +3,8 @@ const TaskAssignment = require('../models/TaskAssignment');
 
 exports.createRequest = async (req, res) => {
   try {
-    // ADDED contactPhone here so the server actually grabs it from the frontend!
-    const { title, description, category, urgency, location, latitude, longitude, contactPhone } = req.body;
+    // We added availableDate and bloodType to the incoming data!
+    const { title, description, category, urgency, location, latitude, longitude, contactPhone, availableDate, bloodType } = req.body;
 
     const newRequest = await SupportRequest.create({
       title, 
@@ -14,7 +14,9 @@ exports.createRequest = async (req, res) => {
       location, 
       latitude, 
       longitude,
-      contactPhone, // SAVES IT TO MYSQL HERE
+      contactPhone,
+      availableDate, // SAVES THE DATE
+      bloodType,     // SAVES THE BLOOD TYPE
       citizenId: req.user.id 
     });
 
@@ -28,7 +30,7 @@ exports.getMyRequests = async (req, res) => {
   try {
     const requests = await SupportRequest.findAll({
       where: { citizenId: req.user.id },
-      include:[{ model: TaskAssignment, as: 'taskDetails' }], 
+      include: [{ model: TaskAssignment, as: 'taskDetails' }], 
       order: [['createdAt', 'DESC']]
     });
 

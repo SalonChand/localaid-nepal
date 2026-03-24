@@ -11,9 +11,11 @@ const SupportRequest = sequelize.define('SupportRequest', {
   location: { type: DataTypes.STRING, allowNull: false },
   latitude: { type: DataTypes.FLOAT, allowNull: true },
   longitude: { type: DataTypes.FLOAT, allowNull: true },
+  contactPhone: { type: DataTypes.STRING, allowNull: true },
   
-  // NEW FIELD: Contact Phone for SMS
-  contactPhone: { type: DataTypes.STRING, allowNull: true }
+  // NEW FIELDS FOR BLOOD AND DATES
+  availableDate: { type: DataTypes.DATEONLY, allowNull: true },
+  bloodType: { type: DataTypes.STRING, allowNull: true }
 }, {
   timestamps: true,
 });

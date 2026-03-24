@@ -18,17 +18,22 @@ const LocationMarker = ({ position, setPosition }) => {
 
 const CreateRequest = () => {
   const [formData, setFormData] = useState({
-    title: '', description: '', category: 'General', urgency: 'Medium', location: '', 
-    contactPhone: '' // NEW FIELD
+    title: '', description: '', category: 'General', urgency: 'Medium', location: '', contactPhone: '',
+    availableDate: '', bloodType: '' // NEW FIELDS ADDED HERE
   });
   
-  const[position, setPosition] = useState({ lat: 27.7172, lng: 85.3240 });
+  const [position, setPosition] = useState({ lat: 27.7172, lng: 85.3240 });
   const [error, setError] = useState('');
-  const[isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    // If the category changes to something other than 'Blood', clear the bloodType field automatically!
+    if (e.target.name === 'category' && e.target.value !== 'Blood') {
+      setFormData({ ...formData, category: e.target.value, bloodType: '' });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -43,27 +48,21 @@ const CreateRequest = () => {
     };
 
     try {
-      // SMART CHECK: Are we offline?
       if (!navigator.onLine) {
-        // If offline, import the service dynamically (or at top) and save it!
         const { saveOfflineRequest } = await import('../services/offlineSyncService');
         saveOfflineRequest(requestPayload);
-        
-        alert("⚠️ You are currently offline. Your request has been saved safely to your device and will be sent automatically when you reconnect to Wi-Fi or 4G.");
+        alert("⚠️ You are offline. Your request has been saved to your device and will be sent automatically when internet returns.");
         navigate('/dashboard');
         return;
       }
 
-      // If online, send it to the real backend immediately
       await createSupportRequest(requestPayload);
       navigate('/dashboard');
-      
     } catch (err) {
-      // Fallback: If it looked like we were online but the network failed anyway
       if (err.message === 'Network Error' || !err.response) {
         const { saveOfflineRequest } = await import('../services/offlineSyncService');
         saveOfflineRequest(requestPayload);
-        alert("⚠️ Network connection failed. Your request has been saved offline and will sync when internet returns.");
+        alert("⚠️ Network connection failed. Your request is saved offline.");
         navigate('/dashboard');
       } else {
         setError(err.response?.data?.message || 'Failed to submit request.');
@@ -72,7 +71,7 @@ const CreateRequest = () => {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-[calc(100vh-64px)] bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="max-w-3xl w-full bg-white rounded-3xl shadow-sm border border-slate-200 p-8 sm:p-10">
@@ -101,13 +100,13 @@ const CreateRequest = () => {
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">Request Title</label>
-            <input type="text" name="title" required placeholder="e.g., Need Emergency Food" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900" value={formData.title} onChange={handleChange} />
+            <input type="text" name="title" required placeholder="e.g., Urgent O- Blood Required" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900" value={formData.title} onChange={handleChange} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">General Area</label>
-              <input type="text" name="location" required placeholder="e.g., Ward 10, Patan" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900" value={formData.location} onChange={handleChange} />
+              <input type="text" name="location" required placeholder="e.g., Bir Hospital, Kathmandu" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900" value={formData.location} onChange={handleChange} />
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mobile Number (For SMS Alerts)</label>
@@ -115,17 +114,13 @@ const CreateRequest = () => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Detailed Description</label>
-            <textarea name="description" required rows="3" placeholder="Please describe exactly what you need..." className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900 resize-none" value={formData.description} onChange={handleChange}></textarea>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Category</label>
-              <select name="category" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900" value={formData.category} onChange={handleChange}>
+              <select name="category" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900 cursor-pointer" value={formData.category} onChange={handleChange}>
                 <option value="Food">Food & Water</option>
                 <option value="Medical">Medical Assistance</option>
+                <option value="Blood">Blood Donation (Urgent)</option>
                 <option value="Shelter">Shelter & Clothing</option>
                 <option value="Rescue">Emergency Rescue</option>
                 <option value="General">General Support</option>
@@ -133,13 +128,45 @@ const CreateRequest = () => {
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Urgency Level</label>
-              <select name="urgency" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900" value={formData.urgency} onChange={handleChange}>
+              <select name="urgency" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900 cursor-pointer" value={formData.urgency} onChange={handleChange}>
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
                 <option value="High">High</option>
                 <option value="Critical">Critical</option>
               </select>
             </div>
+          </div>
+
+          {/* DYNAMIC ROW: Date & Blood Type */}
+          <div className={`grid grid-cols-1 ${formData.category === 'Blood' ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-5`}>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Needed By Date (Optional)</label>
+              <input type="date" name="availableDate" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900" value={formData.availableDate} onChange={handleChange} />
+            </div>
+
+            {/* MAGIC CONDITIONAL RENDERING: Only shows if Category is "Blood" */}
+            {formData.category === 'Blood' && (
+              <div className="animate-fade-in">
+                <label className="block text-sm font-bold text-rose-600 mb-1.5">Required Blood Type</label>
+                <select name="bloodType" required className="w-full px-4 py-2.5 bg-rose-50 border border-rose-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-rose-500/20 outline-none text-slate-900 font-bold cursor-pointer" value={formData.bloodType} onChange={handleChange}>
+                  <option value="" disabled>Select Blood Group...</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="Any">Any Type (Rare)</option>
+                </select>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Detailed Description</label>
+            <textarea name="description" required rows="3" placeholder="Please describe exactly what you need..." className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900 resize-none" value={formData.description} onChange={handleChange}></textarea>
           </div>
 
           <div className="pt-4">
