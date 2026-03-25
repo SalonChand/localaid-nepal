@@ -19,21 +19,60 @@ const LocationMarker = ({ position, setPosition }) => {
 const CreateRequest = () => {
   const [formData, setFormData] = useState({
     title: '', description: '', category: 'General', urgency: 'Medium', location: '', contactPhone: '',
-    availableDate: '', bloodType: '' // NEW FIELDS ADDED HERE
+    availableDate: '', bloodType: ''
   });
   
-  const [position, setPosition] = useState({ lat: 27.7172, lng: 85.3240 });
+  const[position, setPosition] = useState({ lat: 27.7172, lng: 85.3240 });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false); // NEW STATE FOR VOICE AI
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    // If the category changes to something other than 'Blood', clear the bloodType field automatically!
     if (e.target.name === 'category' && e.target.value !== 'Blood') {
       setFormData({ ...formData, category: e.target.value, bloodType: '' });
     } else {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
+      setFormData({ ...formData,[e.target.name]: e.target.value });
     }
+  };
+
+  // --- VOICE TO TEXT AI LOGIC ---
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      alert("Sorry, your browser does not support Voice-to-Text dictation.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US'; // Can be changed to 'ne-NP' for Nepali!
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      // Append the spoken words to whatever is already typed in the description box
+      setFormData((prev) => ({
+        ...prev,
+        description: prev.description ? `${prev.description} ${transcript}` : transcript
+      }));
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
   };
 
   const handleSubmit = async (e) => {
@@ -137,14 +176,12 @@ const CreateRequest = () => {
             </div>
           </div>
 
-          {/* DYNAMIC ROW: Date & Blood Type */}
           <div className={`grid grid-cols-1 ${formData.category === 'Blood' ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-5`}>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Needed By Date (Optional)</label>
               <input type="date" name="availableDate" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900" value={formData.availableDate} onChange={handleChange} />
             </div>
 
-            {/* MAGIC CONDITIONAL RENDERING: Only shows if Category is "Blood" */}
             {formData.category === 'Blood' && (
               <div className="animate-fade-in">
                 <label className="block text-sm font-bold text-rose-600 mb-1.5">Required Blood Type</label>
@@ -164,9 +201,46 @@ const CreateRequest = () => {
             )}
           </div>
 
+          {/* UPGRADED DESCRIPTION BOX WITH MICROPHONE BUTTON */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Detailed Description</label>
-            <textarea name="description" required rows="3" placeholder="Please describe exactly what you need..." className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-900 resize-none" value={formData.description} onChange={handleChange}></textarea>
+            <div className="flex justify-between items-end mb-1.5">
+              <label className="block text-sm font-semibold text-slate-700">Detailed Description</label>
+              <button 
+                type="button" 
+                onClick={startListening}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                  isListening ? 'bg-rose-100 text-rose-600 animate-pulse' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                }`}
+              >
+                {isListening ? (
+                  <>
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                    </span>
+                    Listening...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                    Tap to Speak
+                  </>
+                )}
+              </button>
+            </div>
+            <textarea 
+              name="description" 
+              required 
+              rows="4" 
+              placeholder="Type or use the microphone to describe exactly what you need..." 
+              className={`w-full px-4 py-3 bg-slate-50 border rounded-xl focus:bg-white focus:ring-2 focus:outline-none transition-all resize-none ${
+                isListening ? 'border-rose-300 ring-2 ring-rose-500/20 shadow-inner' : 'border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900'
+              }`}
+              value={formData.description} 
+              onChange={handleChange}
+            ></textarea>
           </div>
 
           <div className="pt-4">
