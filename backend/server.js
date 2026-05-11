@@ -38,7 +38,14 @@ Organization.belongsTo(User, { foreignKey: 'ownerId', as: 'owner' });
 User.hasMany(Notification, { foreignKey: 'userId', as: 'notifications' });
 Notification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
-// NEW CHAT RELATIONSHIPS
+// --- EVENT PARTICIPATION RELATIONSHIPS (THE FIX) ---
+Event.hasMany(Participation, { foreignKey: 'eventId', as: 'participants' });
+Participation.belongsTo(Event, { foreignKey: 'eventId', as: 'event' });
+
+User.hasMany(Participation, { foreignKey: 'userId', as: 'participations' });
+Participation.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+// CHAT RELATIONSHIPS
 TaskAssignment.hasMany(Message, { foreignKey: 'taskId', as: 'messages' });
 Message.belongsTo(TaskAssignment, { foreignKey: 'taskId', as: 'task' });
 
@@ -77,7 +84,7 @@ io.on('connection', (socket) => {
 
       // Fetch the message again to include sender details
       const fullMessage = await Message.findByPk(savedMessage.id, {
-        include:[{ model: User, as: 'sender', attributes: ['id', 'name', 'role'] }]
+        include: [{ model: User, as: 'sender', attributes: ['id', 'name', 'role'] }]
       });
 
       // 2. Broadcast the message instantly to anyone else in this task's chat room
@@ -101,7 +108,7 @@ sequelize.authenticate()
   })
   .then(() => {
     console.log('Database models synchronized.');
-    
+
     // Start the SERVER instead of the APP so Socket.io works!
     server.listen(PORT, () => {
       console.log(`=================================`);
