@@ -4,7 +4,7 @@ const SOSButton = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Official Emergency Numbers for Nepal
-  const emergencyContacts =[
+  const emergencyContacts = [
     { name: 'Police Control', number: '100', color: 'bg-blue-600' },
     { name: 'Fire Brigade', number: '101', color: 'bg-orange-600' },
     { name: 'Ambulance', number: '102', color: 'bg-emerald-600' },
@@ -14,8 +14,14 @@ const SOSButton = () => {
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end">
-      
+    // bottom-24 on mobile clears the fixed bottom nav; md:bottom-6 restores
+    // the normal position on desktop (no bottom nav there).
+    // Extra safe-area padding keeps it above the iPhone home indicator.
+    <div
+      className="fixed right-6 bottom-24 md:bottom-6 z-[100] flex flex-col items-end"
+      style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+    >
+
       {/* Expanded Menu */}
       {isOpen && (
         <div className="mb-4 w-64 bg-white rounded-3xl shadow-2xl border border-rose-100 overflow-hidden origin-bottom-right transform transition-all duration-300">
@@ -47,19 +53,20 @@ const SOSButton = () => {
         </div>
       )}
 
-      {/* Floating Action Button */}
+      {/* Floating Action Button — smaller on mobile so it reads as secondary to the + */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative group focus:outline-none"
+        aria-label="Emergency contacts"
       >
         <div className={`absolute inset-0 bg-rose-500 rounded-full blur opacity-60 group-hover:opacity-100 transition-opacity duration-300 ${!isOpen ? 'animate-pulse' : ''}`}></div>
-        <div className={`relative flex items-center justify-center w-16 h-16 rounded-full shadow-xl transition-transform duration-300 ${isOpen ? 'bg-slate-800 rotate-45' : 'bg-rose-600 hover:scale-105'}`}>
+        <div className={`relative flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full shadow-xl transition-transform duration-300 ${isOpen ? 'bg-slate-800 rotate-45' : 'bg-rose-600 hover:scale-105'}`}>
           {isOpen ? (
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-7 h-7 md:w-8 md:h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
           ) : (
-            <span className="text-white font-black text-xl tracking-tighter">SOS</span>
+            <span className="text-white font-black text-lg md:text-xl tracking-tighter">SOS</span>
           )}
         </div>
       </button>
