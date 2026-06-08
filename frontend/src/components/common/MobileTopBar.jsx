@@ -3,11 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 /**
  * Minimal app-style top bar for mobile.
- * Compact, sticky, just the brand mark — the bottom nav does the navigating.
- * Hidden on auth screens so login/register feel full-screen.
- *
- * NOTE: This is the MOBILE bar. Your existing <Header /> is kept for
- * desktop (md and up) — see App.jsx where each is shown at the right breakpoint.
+ * Shows the LocalAid logo mark + wordmark. Hidden on auth screens.
  */
 const MobileTopBar = () => {
   const location = useLocation();
@@ -21,15 +17,17 @@ const MobileTopBar = () => {
     >
       <div className="flex items-center justify-between h-14 px-4">
         <Link to="/" className="flex items-center gap-2">
-          <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white text-sm font-bold">
-            L
-          </span>
+          <img
+            src="/logo-mark-256.png"
+            alt="LocalAid"
+            className="w-8 h-8 object-contain"
+          />
           <span className="text-lg font-bold tracking-tight text-slate-900">
-            LocalAid<span className="text-indigo-600">.np</span>
+            local<span className="text-emerald-500">aid</span>
           </span>
         </Link>
 
-        {/* Right slot: keep your language toggle / notifications here later */}
+        {/* Right slot: language toggle / notifications can go here later */}
         <div className="flex items-center gap-2" />
       </div>
     </header>

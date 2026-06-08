@@ -4,15 +4,15 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { qrcode } from 'vite-plugin-qrcode';
 
 export default defineConfig({
-  // host: true exposes the dev server to your WiFi network automatically,
-  // so plain `npm run dev` works on your phone — no --host flag needed.
+  // host: true exposes the dev server to your WiFi so `npm run dev`
+  // works on your phone with no --host flag. qrcode() prints a scannable QR.
   server: {
     host: true,
     port: 5173,
   },
   plugins: [
     react(),
-    qrcode(), // prints a scannable QR for the Network URL in the terminal
+    qrcode(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
@@ -36,7 +36,7 @@ export default defineConfig({
             type: 'image/png'
           },
           {
-            src: '/pwa-512x512.png',
+            src: '/pwa-maskable-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
