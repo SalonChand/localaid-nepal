@@ -1,53 +1,145 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import {
+  HandHeart,
+  HeartHandshake,
+  Calendar,
+  Building2,
+  Phone,
+  ArrowRight,
+} from 'lucide-react';
 
 const HomePage = () => {
   const { user } = useContext(AuthContext);
 
-  return (
-    <div className="min-h-[calc(100vh-64px)] bg-slate-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      
-      {/* Decorative Background Elements */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+  // Quick actions wired to your real routes.
+  // Each card: route, label, sublabel, icon, and a color accent.
+  const actions = [
+    {
+      to: '/create-request',
+      label: 'Request Help',
+      sub: 'Food, medical, shelter & more',
+      Icon: HandHeart,
+      accent: 'bg-indigo-50 text-indigo-600',
+      span: true, // full-width hero action
+    },
+    {
+      to: '/tasks',
+      label: 'Volunteer',
+      sub: 'Help people nearby',
+      Icon: HeartHandshake,
+      accent: 'bg-emerald-50 text-emerald-600',
+    },
+    {
+      to: '/events',
+      label: 'Events',
+      sub: 'Drives & camps',
+      Icon: Calendar,
+      accent: 'bg-amber-50 text-amber-600',
+    },
+    {
+      to: '/organizations',
+      label: 'NGO Directory',
+      sub: 'Verified orgs',
+      Icon: Building2,
+      accent: 'bg-sky-50 text-sky-600',
+    },
+    {
+      to: '/dashboard',
+      label: 'My Activity',
+      sub: 'Requests & tasks',
+      Icon: ArrowRight,
+      accent: 'bg-slate-100 text-slate-700',
+    },
+  ];
 
-      <div className="max-w-3xl w-full text-center space-y-8 relative z-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-sm font-semibold mb-4 tracking-wide">
-          <span className="relative flex h-2 w-2">
+  const firstName = user?.name ? user.name.split(' ')[0] : null;
+
+  return (
+    <div className="min-h-[calc(100vh-3.5rem)] bg-slate-50">
+      {/* Greeting header */}
+      <div className="px-5 pt-6 pb-4">
+        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-semibold mb-3 tracking-wide">
+          <span className="relative flex h-1.5 w-1.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500"></span>
           </span>
           Live in Nepal
         </div>
-        
-        <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
-          Community Support, <br className="hidden md:block" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-emerald-500">
-            Coordinated & Delivered.
-          </span>
-        </h1>
-        
-        <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
-          A centralized platform connecting citizens in need with dedicated volunteers and verified organizations across Nepal.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-          {user ? (
-            <Link to="/dashboard" className="bg-slate-900 hover:bg-indigo-600 text-white font-semibold py-3.5 px-8 rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
-              Go to My Dashboard
-            </Link>
+
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight leading-snug">
+          {firstName ? (
+            <>Namaste, {firstName} 👋</>
           ) : (
-            <>
-              <Link to="/register" className="bg-slate-900 hover:bg-indigo-600 text-white font-semibold py-3.5 px-8 rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
-                Create Account
-              </Link>
-              <Link to="/login" className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-3.5 px-8 rounded-xl shadow-sm transition-all duration-300">
-                Sign In
-              </Link>
-            </>
+            <>Namaste 👋</>
           )}
-        </div>
+        </h1>
+        <p className="text-slate-500 mt-1 text-[15px]">
+          How can we help your community today?
+        </p>
       </div>
+
+      {/* Quick-action grid */}
+      <div className="px-5 grid grid-cols-2 gap-3">
+        {actions.map(({ to, label, sub, Icon, accent, span }) => (
+          <Link
+            key={to}
+            to={to}
+            className={`${
+              span ? 'col-span-2' : ''
+            } group bg-white rounded-2xl border border-slate-200 p-4 active:scale-[0.98] transition-transform`}
+          >
+            <div
+              className={`flex items-center justify-center w-11 h-11 rounded-xl ${accent} mb-3`}
+            >
+              <Icon size={22} strokeWidth={2} />
+            </div>
+            <div className="font-bold text-slate-900 text-[15px] leading-tight">
+              {label}
+            </div>
+            <div className="text-slate-400 text-xs mt-0.5">{sub}</div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Logged-out CTA */}
+      {!user && (
+        <div className="px-5 mt-6 space-y-3">
+          <Link
+            to="/register"
+            className="block w-full text-center bg-slate-900 active:bg-indigo-600 text-white font-semibold py-3.5 rounded-xl transition-colors"
+          >
+            Create Account
+          </Link>
+          <Link
+            to="/login"
+            className="block w-full text-center bg-white text-slate-700 border border-slate-200 font-semibold py-3.5 rounded-xl"
+          >
+            Sign In
+          </Link>
+        </div>
+      )}
+
+      {/* Emergency banner — always visible, taps to phone dialer */}
+      <div className="px-5 mt-6">
+        <a
+          href="tel:100"
+          className="flex items-center gap-3 bg-rose-50 border border-rose-100 rounded-2xl p-4 active:scale-[0.98] transition-transform"
+        >
+          <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-rose-600 text-white shrink-0">
+            <Phone size={20} strokeWidth={2} />
+          </div>
+          <div className="min-w-0">
+            <div className="font-bold text-rose-700 text-[15px]">Emergency?</div>
+            <div className="text-rose-500 text-xs">
+              Tap to call Police Control · 100
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div className="h-6" />
     </div>
   );
 };

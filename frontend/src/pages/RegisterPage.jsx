@@ -1,123 +1,161 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { User, Mail, Lock } from 'lucide-react';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+
+const ROLES = [
+  { value: 'citizen', label: 'I need help', desc: 'Citizen' },
+  { value: 'volunteer', label: 'I want to help', desc: 'Volunteer' },
+  { value: 'organization', label: 'We are an NGO / group', desc: 'Organization' },
+];
 
 const RegisterPage = () => {
-  const[formData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    role: 'citizen'
+    role: 'citizen',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData,[e.target.name]: e.target.value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
     try {
       await register(formData);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(
+        err.response?.data?.message ||
+          'Registration failed. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 py-10">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-sm border border-slate-200 p-8 sm:p-10">
-        
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Create an Account</h2>
-          <p className="text-sm text-slate-500 mt-2">Join the LocalAid network today.</p>
+    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col px-6">
+      <div className="pt-14 pb-6">
+        <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-2xl font-bold mb-6">
+          L
         </div>
-        
-        {error && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-medium mb-6">
-            {error}
-          </div>
-        )}
+        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          Create account
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-2 text-[15px]">
+          Join the LocalAid network today.
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              required
-              placeholder="e.g. Ram Bahadur"
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-900"
-              value={formData.name}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email Address</label>
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="name@example.com"
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-900"
-              value={formData.email}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
-            <input
-              type="password"
-              name="password"
-              required
-              placeholder="••••••••"
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-900"
-              value={formData.password}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">I am registering as a...</label>
-            <select
-              name="role"
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-900 appearance-none cursor-pointer"
-              value={formData.role}
-              onChange={handleChange}
-            >
-              <option value="citizen">Citizen (I need help)</option>
-              <option value="volunteer">Volunteer (I want to help)</option>
-              <option value="organization">Organization (NGO/Group)</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full bg-slate-900 text-white font-semibold py-3 px-4 rounded-xl hover:bg-indigo-600 transition-all duration-300 shadow-sm mt-4 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-          >
-            {isLoading ? 'Creating Account...' : 'Create Account'}
-          </button>
-        </form>
-
-        <div className="mt-8 text-center text-sm text-slate-500">
-          Already have an account?{' '}
-          <Link to="/login" className="text-indigo-600 hover:text-indigo-700 font-semibold hover:underline">
-            Sign in here
-          </Link>
+      {error && (
+        <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 px-4 py-3 rounded-2xl text-sm font-medium mb-5">
+          {error}
         </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4 flex-1">
+        <Input
+          label="Full Name"
+          icon={User}
+          type="text"
+          name="name"
+          required
+          placeholder="e.g. Ram Bahadur"
+          value={formData.name}
+          onChange={handleChange}
+        />
+        <Input
+          label="Email Address"
+          icon={Mail}
+          type="email"
+          name="email"
+          required
+          placeholder="name@example.com"
+          value={formData.email}
+          onChange={handleChange}
+          autoComplete="email"
+        />
+        <Input
+          label="Password"
+          icon={Lock}
+          type="password"
+          name="password"
+          required
+          placeholder="••••••••"
+          value={formData.password}
+          onChange={handleChange}
+          autoComplete="new-password"
+        />
+
+        {/* Role selector as tappable cards instead of a dropdown */}
+        <div>
+          <span className="block text-[13px] font-medium text-slate-500 dark:text-slate-400 mb-2 ml-1">
+            I am registering as
+          </span>
+          <div className="space-y-2">
+            {ROLES.map((r) => {
+              const active = formData.role === r.value;
+              return (
+                <button
+                  type="button"
+                  key={r.value}
+                  onClick={() =>
+                    setFormData({ ...formData, role: r.value })
+                  }
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border text-left transition-all active:scale-[0.99]
+                    ${
+                      active
+                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40'
+                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900'
+                    }`}
+                >
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white text-[15px]">
+                      {r.label}
+                    </div>
+                    <div className="text-xs text-slate-400">{r.desc}</div>
+                  </div>
+                  <span
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center
+                      ${active ? 'border-indigo-600' : 'border-slate-300 dark:border-slate-600'}`}
+                  >
+                    {active && (
+                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <Button type="submit" variant="primary" loading={isLoading}>
+            Create Account
+          </Button>
+        </div>
+      </form>
+
+      <div
+        className="text-center text-[15px] text-slate-500 dark:text-slate-400 py-8"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
+      >
+        Already have an account?{' '}
+        <Link to="/login" className="text-indigo-600 font-semibold">
+          Sign in
+        </Link>
       </div>
     </div>
   );
