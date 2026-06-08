@@ -1,8 +1,9 @@
 import React from 'react';
 
 /**
- * Full-width app-style button.
- * variant: 'primary' (indigo) | 'secondary' (outlined) | 'dark'
+ * Full-width app-style button, matching the original LocalAid look
+ * (slate-900 base that turns indigo on press). Light mode only.
+ * variant: 'primary' (slate-900 -> indigo) | 'secondary' (outlined)
  */
 const Button = ({
   children,
@@ -13,17 +14,15 @@ const Button = ({
 }) => {
   const variants = {
     primary:
-      'bg-indigo-600 text-white active:bg-indigo-700 disabled:opacity-60',
-    dark:
-      'bg-slate-900 dark:bg-white text-white dark:text-slate-900 active:opacity-90 disabled:opacity-60',
+      'bg-slate-900 text-white active:bg-indigo-600 shadow-sm disabled:opacity-70',
     secondary:
-      'bg-transparent text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 active:bg-slate-100 dark:active:bg-slate-800',
+      'bg-white text-slate-700 border border-slate-200 active:bg-slate-50',
   };
 
   return (
     <button
-      className={`w-full font-semibold py-3.5 px-4 rounded-2xl text-[16px]
-        transition-all active:scale-[0.99]
+      className={`w-full font-semibold py-3.5 px-4 rounded-xl text-[16px]
+        transition-all duration-300 active:scale-[0.99]
         disabled:cursor-not-allowed
         ${variants[variant]} ${className}`}
       disabled={loading || props.disabled}

@@ -46,21 +46,21 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col px-6">
+    <div className="min-h-screen bg-slate-50 flex flex-col px-6">
       <div className="pt-14 pb-6">
         <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-2xl font-bold mb-6">
           L
         </div>
-        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
           Create account
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-2 text-[15px]">
+        <p className="text-slate-500 mt-2 text-[15px]">
           Join the LocalAid network today.
         </p>
       </div>
 
       {error && (
-        <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 px-4 py-3 rounded-2xl text-sm font-medium mb-5">
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-medium mb-5">
           {error}
         </div>
       )}
@@ -99,9 +99,8 @@ const RegisterPage = () => {
           autoComplete="new-password"
         />
 
-        {/* Role selector as tappable cards instead of a dropdown */}
         <div>
-          <span className="block text-[13px] font-medium text-slate-500 dark:text-slate-400 mb-2 ml-1">
+          <span className="block text-sm font-semibold text-slate-700 mb-2 ml-1">
             I am registering as
           </span>
           <div className="space-y-2">
@@ -111,25 +110,23 @@ const RegisterPage = () => {
                 <button
                   type="button"
                   key={r.value}
-                  onClick={() =>
-                    setFormData({ ...formData, role: r.value })
-                  }
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border text-left transition-all active:scale-[0.99]
+                  onClick={() => setFormData({ ...formData, role: r.value })}
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border text-left transition-all active:scale-[0.99]
                     ${
                       active
-                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40'
-                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900'
+                        ? 'border-indigo-500 bg-indigo-50'
+                        : 'border-slate-200 bg-slate-50'
                     }`}
                 >
                   <div>
-                    <div className="font-semibold text-slate-900 dark:text-white text-[15px]">
+                    <div className="font-semibold text-slate-900 text-[15px]">
                       {r.label}
                     </div>
                     <div className="text-xs text-slate-400">{r.desc}</div>
                   </div>
                   <span
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center
-                      ${active ? 'border-indigo-600' : 'border-slate-300 dark:border-slate-600'}`}
+                      ${active ? 'border-indigo-600' : 'border-slate-300'}`}
                   >
                     {active && (
                       <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />
@@ -149,7 +146,7 @@ const RegisterPage = () => {
       </form>
 
       <div
-        className="text-center text-[15px] text-slate-500 dark:text-slate-400 py-8"
+        className="text-center text-[15px] text-slate-500 py-8"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
       >
         Already have an account?{' '}

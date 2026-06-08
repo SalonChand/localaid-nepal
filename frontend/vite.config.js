@@ -4,6 +4,12 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { qrcode } from 'vite-plugin-qrcode';
 
 export default defineConfig({
+  // host: true exposes the dev server to your WiFi network automatically,
+  // so plain `npm run dev` works on your phone — no --host flag needed.
+  server: {
+    host: true,
+    port: 5173,
+  },
   plugins: [
     react(),
     qrcode(), // prints a scannable QR for the Network URL in the terminal
@@ -14,9 +20,9 @@ export default defineConfig({
         name: 'LocalAid Nepal',
         short_name: 'LocalAid',
         description: 'Coordinated Social Support Services for Communities in Nepal',
-        theme_color: '#4f46e5', // The indigo-600 color we used in our UI
-        background_color: '#f8fafc', // slate-50 background
-        display: 'standalone', // This hides the browser URL bar so it feels like a native app
+        theme_color: '#4f46e5',
+        background_color: '#f8fafc',
+        display: 'standalone',
         orientation: 'portrait',
         icons: [
           {
